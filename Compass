@@ -1,0 +1,9 @@
+We plan to add a compass to the mower to determine heading and tilt of the mower.
+Using a Feather nRF52840 sense board with onboard gyro and magnatometer.
+Follow direction on:
+  https://learn.adafruit.com/adafruit-sensorlab-magnetometer-calibration/magnetometer-calibration
+to calibrate the magnetometer
+The above step may not be required the abve steps are repeated in the directions below.  I did not realise this until after.  If I have to calibrate again I will attempt by using the below direction.
+Follow deretions on:
+  https://learn.adafruit.com/how-to-fuse-motion-sensor-data-into-ahrs-orientation-euler-quaternions/overview
+Next step is to test the compass to confirm operation.
