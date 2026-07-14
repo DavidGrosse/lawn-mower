@@ -1,1 +1,104 @@
+import RPi.GPIO as GPIO
+import time
+
+# --- Pin Definitions ---
+# Update these based on your specific Cytron board connections
+PWM_LEFT = 12   # Pin for Left Motor PWM
+DIR_LEFT = 16   # Pin for Left Motor DIR (Direction)
+
+PWM_RIGHT = 13  # Pin for Right Motor PWM
+DIR_RIGHT = 18  # Pin for Right Motor DIR (Direction)
+
+# --- Configuration ---
+FREQ = 1000       # PWM frequency in Hz
+MAX_SPEED = 100   # Max duty cycle (0-100)
+
+# --- Setup ---
+GPIO.setmode(GPIO.BOARD)
+GPIO.setwarnings(False)
+
+GPIO.setup(PWM_LEFT, GPIO.OUT)
+GPIO.setup(DIR_LEFT, GPIO.OUT)
+GPIO.setup(PWM_RIGHT, GPIO.OUT)
+GPIO.setup(DIR_RIGHT, GPIO.OUT)
+
+# Initialize PWM objects
+pwm_l = GPIO.PWM(PWM_LEFT, FREQ)
+pwm_r = GPIO.PWM(PWM_RIGHT, FREQ)
+pwm_l.start(0)
+pwm_r.start(0)
+
+# --- Motor Control Functions ---
+def set_speed(left_percent, right_percent):
+    """Sets the speed and direction for both motors."""
+    # Limit to maximum allowed speed percentage
+    left_percent = max(min(left_percent, MAX_SPEED), -MAX_SPEED)
+    right_percent = max(min(right_percent, MAX_SPEED), -MAX_SPEED)
+
+    # Left Motor Direction & Speed
+    if left_percent >= 0:
+        GPIO.output(DIR_LEFT, GPIO.HIGH) # Forward
+        pwm_l.ChangeDutyCycle(left_percent)
+    else:
+        GPIO.output(DIR_LEFT, GPIO.LOW)  # Reverse
+        pwm_l.ChangeDutyCycle(abs(left_percent))
+
+    # Right Motor Direction & Speed
+    if right_percent >= 0:
+        GPIO.output(DIR_RIGHT, GPIO.HIGH) # Forward
+        pwm_r.ChangeDutyCycle(right_percent)
+    else:
+        GPIO.output(DIR_RIGHT, GPIO.LOW)  # Reverse
+        pwm_r.ChangeDutyCycle(abs(right_percent))
+
+def forward(speed):
+    set_speed(speed, speed)
+
+def backward(speed):
+    set_speed(-speed, -speed)
+
+def turn_left(speed):
+    # Left wheel slower than right wheel
+    set_speed(speed * 0.5, speed)
+
+def turn_right(speed):
+    # Right wheel slower than left wheel
+    set_speed(speed, speed * 0.5)
+
+def pivot_left(speed):
+    # Left wheel backward, right wheel forward
+    set_speed(-speed, speed)
+
+def pivot_right(speed):
+    # Left wheel forward, right wheel backward
+    set_speed(speed, -speed)
+
+def stop():
+    set_speed(0, 0)
+
+# --- Main Program ---
+try:
+    print("Moving Forward...")
+    forward(50)
+    time.sleep(2)
+
+    print("Turning Right...")
+    turn_right(50)
+    time.sleep(1)
+
+    print("Pivoting Left...")
+    pivot_left(50)
+    time.sleep(1)
+
+    print("Stopping...")
+    stop()
+    time.sleep(1)
+
+except KeyboardInterrupt:
+    print("Program interrupted")
+
+finally:
+    stop()
+    GPIO.cleanup()
+    print("GPIO Cleaned Up. Exiting.")
 
